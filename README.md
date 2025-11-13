@@ -16,17 +16,19 @@ Premortem watches your system vitals (CPU, memory, disk, processes) and spawns C
 
 ## Installation
 
-From the monorepo root:
+Clone and install:
 
 ```bash
+git clone git@github.com:tilework-tech/nori-premortem.git
+cd nori-premortem
 npm install
+npm run build
 ```
 
-Build the premortem package:
+Or install globally:
 
 ```bash
-cd premortem
-npm run build
+npm install -g .
 ```
 
 ## Configuration
@@ -100,13 +102,26 @@ Stop the daemon with `Ctrl+C`.
 
 ## Webhook Integration
 
+### API Dependency
+
+**IMPORTANT**: This package requires a backend API to receive diagnostic data. It is designed to work with the Nori Observability Server, but any compatible webhook endpoint will work.
+
+**Required API Endpoint**: `POST /api/premortem/ingest/:webhookKey`
+
+The endpoint must:
+- Accept POST requests with raw Claude SDK message payloads
+- Handle messages grouped by `session_id`
+- Be highly available (no retry logic in premortem daemon)
+
 ### Observability Server Setup
 
-Diagnostic transcripts are sent to the Nori observability server:
+Diagnostic transcripts are sent to the Nori Observability Server (separate package):
 
 1. The premortem daemon streams raw Claude SDK messages to the configured webhook URL
 2. Messages are accumulated into "premortem" artifacts in the observability UI
 3. Each diagnostic session appears as a transcript artifact viewable in the UI
+
+**Observability Server Repository**: Internal (contact team for access)
 
 ### Message Format
 
