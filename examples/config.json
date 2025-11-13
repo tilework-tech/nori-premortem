@@ -1,0 +1,17 @@
+{
+  "webhookUrl": "https://your-server.com/api/premortem/ingest",
+  "webhookKey": "premortem-hardcoded-key-12345",
+  "anthropicApiKey": "sk-ant-your-api-key-here",
+  "pollingInterval": 10000,
+  "thresholds": {
+    "memoryPercent": 90,
+    "diskPercent": 85,
+    "cpuPercent": 80
+  },
+  "agentConfig": {
+    "model": "claude-sonnet-4",
+    "allowedTools": ["Read", "Bash", "Grep", "Glob"],
+    "maxTurns": 20,
+    "customPrompt": "Focus on diagnosing system performance issues and identifying resource-heavy processes."
+  }
+}
