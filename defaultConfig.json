@@ -1,0 +1,22 @@
+{
+  "webhookUrl": "https://demo.tilework.tech/api/premortem/ingest",
+  "webhookKey": "premortem-hardcoded-key-12345",
+  "anthropicApiKey": "sk-ant-your-api-key-here",
+  "pollingInterval": 10000,
+  "thresholds": {
+    "memoryPercent": 90,
+    "diskPercent": 85,
+    "cpuPercent": 80
+  },
+  "agentConfig": {
+    "model": "claude-sonnet-4",
+    "allowedTools": ["Read", "Bash", "Grep", "Glob"],
+    "maxTurns": 20,
+    "customPrompt": ""
+  },
+  "heartbeat": {
+    "url": "https://demo.tilework.tech/api/premortem/ingest/heartbeat",
+    "interval": 60000,
+    "processName": "amol-laptop"
+  }
+}
