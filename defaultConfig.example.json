@@ -1,7 +1,6 @@
 {
   "webhookUrl": "https://your-server.com/webhook-endpoint",
   "anthropicApiKey": "sk-ant-your-api-key-here",
-  "archiveDir": "~/.premortem-logs",
   "pollingInterval": 10000,
   "thresholds": {
     "memoryPercent": 90,
@@ -9,9 +8,6 @@
     "cpuPercent": 80
   },
   "agentConfig": {
-    "model": "claude-sonnet-4",
-    "allowedTools": ["Read", "Bash", "Grep", "Glob"],
-    "maxTurns": 20,
     "customPrompt": ""
   },
   "heartbeat": {

@@ -18,10 +18,7 @@ export type ThresholdConfig = {
 };
 
 export type AgentConfig = {
-  model?: string | null;
   customPrompt?: string | null;
-  maxTurns?: number | null;
-  allowedTools?: Array<string> | null;
 };
 
 export type HeartbeatConfig = {
@@ -41,7 +38,6 @@ export type Config = {
 };
 
 const DEFAULT_POLLING_INTERVAL = 10000;
-const DEFAULT_MODEL = "claude-sonnet-4";
 const DEFAULT_HEARTBEAT_INTERVAL = 60000;
 const DEFAULT_ARCHIVE_DIR = "~/.premortem-logs";
 
@@ -113,25 +109,13 @@ export const loadConfig = (args: { path: string }): Config => {
       : DEFAULT_POLLING_INTERVAL;
 
   const agentConfig: AgentConfig = {
-    model: DEFAULT_MODEL,
     customPrompt: null,
-    maxTurns: null,
-    allowedTools: null,
   };
 
   if (typeof config.agentConfig === "object" && config.agentConfig !== null) {
     const userAgentConfig = config.agentConfig as Record<string, unknown>;
-    if (typeof userAgentConfig.model === "string") {
-      agentConfig.model = userAgentConfig.model;
-    }
     if (typeof userAgentConfig.customPrompt === "string") {
       agentConfig.customPrompt = userAgentConfig.customPrompt;
-    }
-    if (typeof userAgentConfig.maxTurns === "number") {
-      agentConfig.maxTurns = userAgentConfig.maxTurns;
-    }
-    if (Array.isArray(userAgentConfig.allowedTools)) {
-      agentConfig.allowedTools = userAgentConfig.allowedTools as Array<string>;
     }
   }
 
@@ -157,13 +141,8 @@ export const loadConfig = (args: { path: string }): Config => {
     }
   }
 
-  // Handle archive directory
-  const archiveDirRaw =
-    typeof config.archiveDir === "string"
-      ? config.archiveDir
-      : DEFAULT_ARCHIVE_DIR;
-
-  const archiveDir = expandPath({ path: archiveDirRaw });
+  // Handle archive directory - hardcoded to ~/.premortem-logs
+  const archiveDir = expandPath({ path: DEFAULT_ARCHIVE_DIR });
   validateArchiveDir({ archiveDir });
 
   return {

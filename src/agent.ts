@@ -81,9 +81,6 @@ export const runAgent = async (args: {
     const messages = query({
       prompt,
       options: {
-        model: config.model || "claude-sonnet-4",
-        maxTurns: config.maxTurns || undefined,
-        allowedTools: config.allowedTools || undefined,
         cwd: archiveDir,
         hooks: {
           PostToolUse: [
