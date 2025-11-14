@@ -44,8 +44,7 @@ Example configuration:
 
 ```json
 {
-  "webhookUrl": "https://your-observability-server.com/api/premortem/ingest",
-  "webhookKey": "premortem-hardcoded-key-12345",
+  "webhookUrl": "https://your-server.com/webhook-endpoint",
   "anthropicApiKey": "sk-ant-your-api-key-here",
   "pollingInterval": 10000,
   "thresholds": {
@@ -58,6 +57,11 @@ Example configuration:
     "allowedTools": ["Read", "Bash", "Grep", "Glob"],
     "maxTurns": 20,
     "customPrompt": "You are diagnosing system performance issues. Focus on memory usage, disk space, CPU utilization, and process behavior."
+  },
+  "heartbeat": {
+    "url": "https://your-server.com/heartbeat-endpoint",
+    "interval": 60000,
+    "processName": "my-process"
   }
 }
 ```
@@ -65,12 +69,9 @@ Example configuration:
 ### Configuration Options
 
 - **webhookUrl** (required): HTTP endpoint to receive diagnostic output
-  - Should point to your observability server's premortem ingest endpoint
-  - Format: `https://your-server.com/api/premortem/ingest`
-  - Do NOT include the webhook key in the URL - it will be appended automatically
-- **webhookKey** (optional, default: "premortem-hardcoded-key-12345"): Authentication key for webhook endpoint
-  - Current: Hardcoded temporary value
-  - Future: Will be generated per-webhook in observability UI
+  - Must accept POST requests with JSON payloads containing Claude SDK message objects
+  - Messages are grouped by `session_id` field
+  - Each message follows the format: `{type: string, session_id: string, ...other_fields}`
 - **anthropicApiKey** (required): Your Anthropic API key for Claude
 - **pollingInterval** (optional, default: 10000): Milliseconds between system checks
 - **thresholds** (required): At least one threshold must be configured

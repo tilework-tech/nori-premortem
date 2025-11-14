@@ -187,4 +187,23 @@ describe("loadConfig", () => {
 
     expect(config.heartbeat).toBeNull();
   });
+
+  it("should load config with webhookUrl containing embedded key", () => {
+    const validConfig = {
+      webhookUrl: "https://example.com/webhook/my-secret-key-12345",
+      anthropicApiKey: "sk-test-key-123",
+      thresholds: {
+        memoryPercent: 90,
+      },
+    };
+
+    writeFileSync(configPath, JSON.stringify(validConfig));
+
+    const config = loadConfig({ path: configPath });
+
+    expect(config.webhookUrl).toBe(
+      "https://example.com/webhook/my-secret-key-12345",
+    );
+    expect(config.webhookKey).toBeUndefined();
+  });
 });
