@@ -1,4 +1,11 @@
-import { writeFileSync, unlinkSync, mkdtempSync } from "node:fs";
+import {
+  writeFileSync,
+  unlinkSync,
+  mkdtempSync,
+  mkdirSync,
+  chmodSync,
+  existsSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -24,9 +31,11 @@ describe("loadConfig", () => {
   });
 
   it("should load valid config from JSON file", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -42,8 +51,10 @@ describe("loadConfig", () => {
   });
 
   it("should throw error when webhookUrl is missing", () => {
+    const archiveDir = join(tmpDir, "archive");
     const invalidConfig = {
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {},
     };
 
@@ -53,8 +64,10 @@ describe("loadConfig", () => {
   });
 
   it("should throw error when anthropicApiKey is missing", () => {
+    const archiveDir = join(tmpDir, "archive");
     const invalidConfig = {
       webhookUrl: "https://example.com/webhook",
+      archiveDir,
       thresholds: {},
     };
 
@@ -64,9 +77,11 @@ describe("loadConfig", () => {
   });
 
   it("should throw error when thresholds is missing", () => {
+    const archiveDir = join(tmpDir, "archive");
     const invalidConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
     };
 
     writeFileSync(configPath, JSON.stringify(invalidConfig));
@@ -75,9 +90,11 @@ describe("loadConfig", () => {
   });
 
   it("should apply default pollingInterval when not provided", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -91,9 +108,11 @@ describe("loadConfig", () => {
   });
 
   it("should use provided pollingInterval", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -108,9 +127,11 @@ describe("loadConfig", () => {
   });
 
   it("should apply default model when not provided", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -130,9 +151,11 @@ describe("loadConfig", () => {
   });
 
   it("should load heartbeat config when provided", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -153,9 +176,11 @@ describe("loadConfig", () => {
   });
 
   it("should apply default heartbeat interval when not provided", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -173,9 +198,11 @@ describe("loadConfig", () => {
   });
 
   it("should allow heartbeat to be omitted entirely", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -189,9 +216,11 @@ describe("loadConfig", () => {
   });
 
   it("should load config with webhookUrl containing embedded key", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook/my-secret-key-12345",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -205,5 +234,89 @@ describe("loadConfig", () => {
       "https://example.com/webhook/my-secret-key-12345",
     );
     expect(config.webhookKey).toBeUndefined();
+  });
+
+  it("should use default archiveDir when not provided", () => {
+    const validConfig = {
+      webhookUrl: "https://example.com/webhook",
+      anthropicApiKey: "sk-test-key-123",
+      thresholds: {
+        memoryPercent: 90,
+      },
+    };
+
+    writeFileSync(configPath, JSON.stringify(validConfig));
+
+    const config = loadConfig({ path: configPath });
+
+    // Should use DEFAULT_ARCHIVE_DIR and expand ~
+    expect(config.archiveDir).toContain(".premortem-logs");
+    expect(existsSync(config.archiveDir)).toBe(true);
+  });
+
+  it("should use provided archiveDir", () => {
+    const customArchiveDir = join(tmpDir, "custom-archive");
+    mkdirSync(customArchiveDir);
+
+    const validConfig = {
+      webhookUrl: "https://example.com/webhook",
+      anthropicApiKey: "sk-test-key-123",
+      thresholds: {
+        memoryPercent: 90,
+      },
+      archiveDir: customArchiveDir,
+    };
+
+    writeFileSync(configPath, JSON.stringify(validConfig));
+
+    const config = loadConfig({ path: configPath });
+
+    expect(config.archiveDir).toBe(customArchiveDir);
+  });
+
+  it("should create archiveDir if it does not exist", () => {
+    const nonExistentDir = join(tmpDir, "nonexistent-archive");
+
+    const validConfig = {
+      webhookUrl: "https://example.com/webhook",
+      anthropicApiKey: "sk-test-key-123",
+      thresholds: {
+        memoryPercent: 90,
+      },
+      archiveDir: nonExistentDir,
+    };
+
+    writeFileSync(configPath, JSON.stringify(validConfig));
+
+    const config = loadConfig({ path: configPath });
+
+    expect(config.archiveDir).toBe(nonExistentDir);
+    expect(existsSync(nonExistentDir)).toBe(true);
+  });
+
+  it("should throw error when archiveDir is not writable", () => {
+    const readonlyArchiveDir = join(tmpDir, "readonly-archive");
+    mkdirSync(readonlyArchiveDir);
+    chmodSync(readonlyArchiveDir, 0o444); // Read-only
+
+    const validConfig = {
+      webhookUrl: "https://example.com/webhook",
+      anthropicApiKey: "sk-test-key-123",
+      thresholds: {
+        memoryPercent: 90,
+      },
+      archiveDir: readonlyArchiveDir,
+    };
+
+    writeFileSync(configPath, JSON.stringify(validConfig));
+
+    try {
+      expect(() => loadConfig({ path: configPath })).toThrow(
+        "Archive directory",
+      );
+    } finally {
+      // Restore permissions for cleanup
+      chmodSync(readonlyArchiveDir, 0o755);
+    }
   });
 });

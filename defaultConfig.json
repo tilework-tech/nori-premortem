@@ -1,6 +1,7 @@
 {
   "webhookUrl": "https://your-server.com/webhook-endpoint",
   "anthropicApiKey": "sk-ant-your-api-key-here",
+  "archiveDir": "~/.premortem-logs",
   "pollingInterval": 10000,
   "thresholds": {
     "memoryPercent": 90,
