@@ -18,13 +18,13 @@ describe("validateHeartbeatEndpoint", () => {
 
     await expect(
       validateHeartbeatEndpoint({
-        url: "https://example.com/heartbeat/test-key",
+        url: "https://example.com/heartbeat",
         processName: "test-daemon",
       }),
     ).resolves.toBeUndefined();
 
     expect(fetch).toHaveBeenCalledWith(
-      "https://example.com/heartbeat/test-key",
+      "https://example.com/heartbeat",
       expect.objectContaining({
         method: "POST",
       }),
@@ -40,7 +40,7 @@ describe("validateHeartbeatEndpoint", () => {
 
     await expect(
       validateHeartbeatEndpoint({
-        url: "https://example.com/heartbeat/wrong-key",
+        url: "https://example.com/heartbeat",
         processName: "test-daemon",
       }),
     ).rejects.toThrow("401");
@@ -51,7 +51,7 @@ describe("validateHeartbeatEndpoint", () => {
 
     await expect(
       validateHeartbeatEndpoint({
-        url: "https://unreachable.example.com/heartbeat/test-key",
+        url: "https://unreachable.example.com/heartbeat",
         processName: "test-daemon",
       }),
     ).rejects.toThrow("Network error");
@@ -75,7 +75,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     } as any);
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat/test-key",
+      url: "https://example.com/heartbeat",
       processName: "my-daemon",
       interval: 60000,
     });
@@ -86,7 +86,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      "https://example.com/heartbeat/test-key",
+      "https://example.com/heartbeat",
       expect.objectContaining({
         method: "POST",
         body: expect.stringContaining("my-daemon"),
@@ -103,7 +103,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     } as any);
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat/test-key",
+      url: "https://example.com/heartbeat",
       processName: "my-daemon",
       interval: 30000,
     });
@@ -133,7 +133,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     } as any);
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat/test-key",
+      url: "https://example.com/heartbeat",
       processName: "my-daemon",
       interval: 60000,
     });
@@ -166,7 +166,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     } as any);
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat/test-key",
+      url: "https://example.com/heartbeat",
       processName: "my-daemon",
       interval: 30000,
     });
@@ -188,7 +188,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     vi.mocked(fetch).mockRejectedValue(new Error("Network error"));
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat/test-key",
+      url: "https://example.com/heartbeat",
       processName: "my-daemon",
       interval: 60000,
     });

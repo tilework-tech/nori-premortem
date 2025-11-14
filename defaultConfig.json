@@ -1,5 +1,5 @@
 {
-  "webhookUrl": "https://demo.tilework.tech/api/premortem/ingest/premortem-hardcoded-key-12345",
+  "webhookUrl": "https://your-server.com/webhook-endpoint",
   "anthropicApiKey": "sk-ant-your-api-key-here",
   "pollingInterval": 10000,
   "thresholds": {
@@ -14,8 +14,8 @@
     "customPrompt": ""
   },
   "heartbeat": {
-    "url": "https://demo.tilework.tech/api/premortem/ingest/heartbeat/premortem-hardcoded-key-12345",
+    "url": "https://your-server.com/heartbeat-endpoint",
     "interval": 60000,
-    "processName": "amol-laptop"
+    "processName": "my-process"
   }
 }
