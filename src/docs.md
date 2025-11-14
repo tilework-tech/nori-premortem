@@ -47,7 +47,9 @@ Path: @/src
 - Called at daemon startup, must complete before monitoring begins
 - Validates key is not empty string
 - Makes minimal API call using `claude-3-haiku` model with maxTurns=1 to verify authentication
-- Distinguishes error types: 401 (invalid key), 503 (service unavailable), others (rethrown)
+- **Dual error detection:** Checks both result messages with `is_error: true` flag AND exception-based errors from SDK
+  - Result message errors: `msg.type === 'result'` with `msg.is_error === true` - error text in `msg.result` for `subtype === 'success'`, or in `msg.errors` array for other subtypes
+  - Exception errors: catch block handles 401 (invalid key), 503 (service unavailable), and rethrows others
 - Throws clear error messages to fail-fast on invalid credentials
 
 **Message Routing** (see `daemon.ts:monitor > onMessage callback`):
@@ -59,6 +61,7 @@ Path: @/src
 ### Things to Know
 
 - **Fail-fast principle:** API key validation happens at startup (not when agent runs), archive directory must be writable before daemon starts - invalid configuration fails immediately with clear errors rather than discovering problems during threshold breaches
+- **API key error detection:** The Anthropic SDK returns invalid API key errors in two ways: (1) as exceptions with `status === 401`, and (2) as result messages with `type: 'result'`, `is_error: true` - the validator checks both paths to ensure all invalid key scenarios fail fast
 - **State management:** Daemon maintains single DaemonState object tracking running/agentRunning/breachDetected/sessionId; this prevents concurrent agent spawns while allowing new breaches to be detected while previous agent is running
 - **Non-blocking agent execution:** `runAgent` is called without await, continues in background; monitoring loop never blocks on agent completion, enabling continuous threshold checking
 - **Error boundaries:** Try-catch at monitor loop level catches and logs metric fetching errors; separate try-catch in runAgent lets agent errors bubble to caller's catch handler; only system boundaries use try-catch per codebase standards

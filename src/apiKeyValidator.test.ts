@@ -46,6 +46,46 @@ describe("validateApiKey", () => {
     );
   });
 
+  it("should throw error when API returns result with is_error: true", async () => {
+    const { query } = await import("@anthropic-ai/claude-agent-sdk");
+
+    // Mock SDK result with is_error: true (the actual format for invalid API keys)
+    vi.mocked(query).mockReturnValue(
+      (async function* () {
+        yield {
+          type: "result",
+          subtype: "success",
+          is_error: true,
+          duration_ms: 523,
+          duration_api_ms: 0,
+          num_turns: 1,
+          result: "Invalid API key · Fix external API key",
+          session_id: "test-session-id",
+          total_cost_usd: 0,
+          usage: {
+            input_tokens: 0,
+            cache_creation_input_tokens: 0,
+            cache_read_input_tokens: 0,
+            output_tokens: 0,
+            server_tool_use: { web_search_requests: 0, web_fetch_requests: 0 },
+            service_tier: "standard",
+            cache_creation: {
+              ephemeral_1h_input_tokens: 0,
+              ephemeral_5m_input_tokens: 0,
+            },
+          },
+          modelUsage: {},
+          permission_denials: [],
+          uuid: "test-uuid",
+        };
+      })(),
+    );
+
+    await expect(validateApiKey({ apiKey: "invalid-key" })).rejects.toThrow(
+      "Invalid API key · Fix external API key",
+    );
+  });
+
   it("should throw error when API returns 503 service unavailable", async () => {
     const { query } = await import("@anthropic-ai/claude-agent-sdk");
 
