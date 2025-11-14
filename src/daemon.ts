@@ -4,6 +4,7 @@ import type { AgentMessage } from "@/agent.js";
 import type { Config } from "@/config.js";
 
 import { generatePrompt, runAgent } from "@/agent.js";
+import { validateApiKey } from "@/apiKeyValidator.js";
 import { validateHeartbeatEndpoint, startHeartbeat } from "@/heartbeat.js";
 import { fetchSystemMetrics, checkThresholds } from "@/monitor.js";
 import { sendWebhook } from "@/webhook.js";
@@ -47,6 +48,9 @@ export const startDaemon = async (args: { config: Config }): Promise<void> => {
   };
 
   logger.info("Premortem daemon starting...");
+
+  // Validate API key before starting
+  await validateApiKey({ apiKey: config.anthropicApiKey });
 
   // Validate and start heartbeat if configured
   if (config.heartbeat) {
