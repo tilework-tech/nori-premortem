@@ -31,14 +31,15 @@ Path: @/src
 
 **Configuration Loading** (see `config.ts:loadConfig`):
 - Validates required fields: webhookUrl, anthropicApiKey, thresholds
-- Applies defaults: pollingInterval (10000ms), model (claude-sonnet-4), heartbeat interval (60000ms)
-- **Archive directory handling:** Uses DEFAULT_ARCHIVE_DIR (`~/.premortem-logs`) if not provided, expands `~` to home directory, creates directory if missing, validates writeability by writing test file
+- Applies defaults: pollingInterval (10000ms), heartbeat interval (60000ms), customPrompt (null)
+- **Archive directory handling:** Hardcoded to `~/.premortem-logs` (not user-configurable), expands `~` to home directory, creates directory if missing, validates writeability by writing test file
+- **Agent configuration:** Only `customPrompt` is user-configurable; model, maxTurns, and allowedTools now use SDK defaults
 - Returns Config object with all fields including expanded archiveDir path
 
 **Monitoring Loop** (see `daemon.ts:monitor`):
 - Fetches system metrics via `monitor.ts:fetchSystemMetrics`
 - Checks thresholds via `monitor.ts:checkThresholds`
-- On breach detection: generates diagnostic prompt via `agent.ts:generatePrompt`, spawns agent, sets agentRunning flag
+- On breach detection: generates diagnostic prompt via `agent.ts:generatePrompt` (prepends customPrompt if configured), spawns agent, sets agentRunning flag
 - Agent runs non-blocking - monitoring continues while agent executes
 - Agent output (messages) streamed to webhook via `webhook.ts:sendWebhook`
 - On agent completion: resets state flags, awaits next breach
@@ -67,6 +68,7 @@ Path: @/src
 - **Error boundaries:** Try-catch at monitor loop level catches and logs metric fetching errors; separate try-catch in runAgent lets agent errors bubble to caller's catch handler; only system boundaries use try-catch per codebase standards
 - **Webhook delivery:** Messages sent immediately as they arrive from agent - if webhook fails or is slow, messages may be lost unless also saved by archiveDir mechanism via agent SDK; webhook URL is used directly (webhook key embedded in URL per recent design change)
 - **Heartbeat independence:** Heartbeat loop runs on separate interval and independent of threshold monitoring - heartbeat fails only prevent heartbeat messages, not daemon operation
-- **Archive directory:** Created during config loading (not at runtime), passed to agent via `runAgent({ archiveDir })`, agent SDK writes `agent-{sessionId}.jsonl` files for session transcript persistence
+- **Archive directory:** Hardcoded to `~/.premortem-logs` (not user-configurable as of simplification), created during config loading (not at runtime), passed to agent via `runAgent({ archiveDir })`, agent SDK writes `agent-{sessionId}.jsonl` files for session transcript persistence
+- **Agent SDK defaults:** Model selection, tool availability (allowedTools), and conversation turn limits (maxTurns) are now controlled entirely by SDK defaults - users can only customize the agent prompt via `customPrompt` field
 
 Created and maintained by Nori.

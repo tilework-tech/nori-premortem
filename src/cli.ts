@@ -64,7 +64,6 @@ export const main = async (argv: Array<string>): Promise<void> => {
     logger.info("Configuration loaded successfully");
     logger.info(`Webhook URL: ${config.webhookUrl}`);
     logger.info(`Polling interval: ${config.pollingInterval}ms`);
-    logger.info(`Agent model: ${config.agentConfig?.model}`);
 
     await startDaemon({ config });
   } catch (error) {

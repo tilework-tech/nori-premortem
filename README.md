@@ -48,7 +48,6 @@ Example configuration:
 {
   "webhookUrl": "https://your-server.com/webhook-endpoint",
   "anthropicApiKey": "sk-ant-your-api-key-here",
-  "archiveDir": "~/.premortem-logs",
   "pollingInterval": 10000,
   "thresholds": {
     "memoryPercent": 90,
@@ -56,9 +55,6 @@ Example configuration:
     "cpuPercent": 80
   },
   "agentConfig": {
-    "model": "claude-sonnet-4",
-    "allowedTools": ["Read", "Bash", "Grep", "Glob"],
-    "maxTurns": 20,
     "customPrompt": "You are diagnosing system performance issues. Focus on memory usage, disk space, CPU utilization, and process behavior."
   },
   "heartbeat": {
@@ -76,21 +72,18 @@ Example configuration:
   - Messages are grouped by `session_id` field
   - Each message follows the format: `{type: string, session_id: string, ...other_fields}`
 - **anthropicApiKey** (required): Your Anthropic API key for Claude
-- **archiveDir** (optional, default: `~/.premortem-logs`): Directory for local session archives
-  - Directory will be automatically created if it doesn't exist
-  - Daemon will fail-fast if directory cannot be created or is not writable
-  - Each Claude agent session is saved as `agent-{sessionId}.jsonl` in this directory
-  - Archives preserve diagnostics even if webhook delivery fails
 - **pollingInterval** (optional, default: 10000): Milliseconds between system checks
 - **thresholds** (required): At least one threshold must be configured
   - **memoryPercent**: Trigger when memory usage exceeds this percentage (uses "available" memory, not "used", to avoid false alerts from Linux buffer/cache)
   - **diskPercent**: Trigger when disk usage exceeds this percentage
   - **cpuPercent**: Trigger when CPU usage exceeds this percentage
 - **agentConfig** (optional): Claude agent configuration
-  - **model** (default: "claude-sonnet-4"): Claude model to use
-  - **allowedTools**: Tools the agent can use (Read, Bash, Grep, etc.)
-  - **maxTurns**: Maximum conversation turns
-  - **customPrompt**: Additional context for the agent
+  - **customPrompt**: Additional context prepended to diagnostic prompt (default: null)
+  - Note: Model, allowed tools, and max turns are controlled by SDK defaults and not user-configurable
+- **heartbeat** (optional): Health check configuration
+  - **url**: Endpoint to receive periodic heartbeat signals
+  - **interval** (default: 60000): Milliseconds between heartbeat signals
+  - **processName**: Process name to monitor and report in heartbeat
 
 ## Usage
 
@@ -102,13 +95,14 @@ nori-premortem --config ./config.json
 
 The daemon will:
 
-1. Create the archive directory if it doesn't exist (default: `~/.premortem-logs`)
-2. Validate the directory is writable (fail-fast if not)
-3. Start monitoring system metrics
-4. When a threshold is breached, spawn a Claude agent with system context
-5. Stream all agent output to your webhook endpoint
-6. Save complete session transcripts to `~/.premortem-logs/agent-{sessionId}.jsonl`
-7. Reset after the agent completes, ready to trigger again
+1. Validate the Anthropic API key with a test query (fail-fast if invalid)
+2. Create the archive directory at `~/.premortem-logs` if it doesn't exist
+3. Validate the archive directory is writable (fail-fast if not)
+4. Start monitoring system metrics
+5. When a threshold is breached, spawn a Claude agent with system context
+6. Stream all agent output to your webhook endpoint
+7. Save complete session transcripts to `~/.premortem-logs/agent-{sessionId}.jsonl`
+8. Reset after the agent completes, ready to trigger again
 
 Stop the daemon with `Ctrl+C`.
 

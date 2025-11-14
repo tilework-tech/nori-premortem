@@ -146,11 +146,10 @@ describe("runAgent", () => {
     vi.mocked(query).mockReturnValue((async function* () {})());
 
     const config: AgentConfig = {
-      model: "claude-opus",
       customPrompt: null,
-      maxTurns: 10,
-      allowedTools: ["Read", "Bash", "Grep"],
     };
+
+    const archiveDir = "/test/archive";
 
     const onMessage = vi.fn();
     const onComplete = vi.fn();
@@ -159,6 +158,7 @@ describe("runAgent", () => {
       prompt: "Diagnose the issue",
       apiKey: "sk-test-key",
       config,
+      archiveDir,
       onMessage,
       onComplete,
     });
@@ -167,9 +167,7 @@ describe("runAgent", () => {
       expect.objectContaining({
         prompt: "Diagnose the issue",
         options: expect.objectContaining({
-          model: "claude-opus",
-          maxTurns: 10,
-          allowedTools: ["Read", "Bash", "Grep"],
+          cwd: archiveDir,
         }),
       }),
     );
@@ -182,10 +180,7 @@ describe("runAgent", () => {
     vi.mocked(query).mockReturnValue((async function* () {})());
 
     const config: AgentConfig = {
-      model: "claude-sonnet-4",
       customPrompt: null,
-      maxTurns: null,
-      allowedTools: null,
     };
 
     await runAgent({
