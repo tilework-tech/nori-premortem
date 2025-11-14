@@ -4,3 +4,4 @@ creds.json
 test-config.json
 *.log
 .DS_Store
+.worktrees/
