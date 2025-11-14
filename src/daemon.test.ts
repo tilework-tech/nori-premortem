@@ -50,7 +50,7 @@ describe("daemon", () => {
   describe("stopDaemon", () => {
     it("should stop the monitoring loop", async () => {
       const config: Config = {
-        webhookUrl: "http://localhost:3000/api/premortem/ingest/test-key",
+        webhookUrl: "http://localhost:3000/webhook",
         anthropicApiKey: "test-api-key",
         thresholds: {
           memoryPercent: 90,
@@ -79,7 +79,7 @@ describe("daemon", () => {
       );
 
       const config: Config = {
-        webhookUrl: "http://localhost:3000/api/premortem/ingest/test-key",
+        webhookUrl: "http://localhost:3000/webhook",
         anthropicApiKey: "test-api-key",
         thresholds: {
           memoryPercent: 90,
@@ -90,7 +90,7 @@ describe("daemon", () => {
         pollingInterval: 1000,
         agentConfig: null,
         heartbeat: {
-          url: "http://localhost:3000/api/premortem/heartbeat/test-key",
+          url: "http://localhost:3000/heartbeat",
           interval: 60000,
           processName: "test-daemon",
         },
@@ -100,13 +100,13 @@ describe("daemon", () => {
 
       // Should validate the endpoint
       expect(validateHeartbeatEndpoint).toHaveBeenCalledWith({
-        url: "http://localhost:3000/api/premortem/heartbeat/test-key",
+        url: "http://localhost:3000/heartbeat",
         processName: "test-daemon",
       });
 
       // Should start heartbeat
       expect(startHeartbeat).toHaveBeenCalledWith({
-        url: "http://localhost:3000/api/premortem/heartbeat/test-key",
+        url: "http://localhost:3000/heartbeat",
         processName: "test-daemon",
         interval: 60000,
       });
@@ -121,7 +121,7 @@ describe("daemon", () => {
       );
 
       const config: Config = {
-        webhookUrl: "http://localhost:3000/api/premortem/ingest/test-key",
+        webhookUrl: "http://localhost:3000/webhook",
         anthropicApiKey: "test-api-key",
         thresholds: {
           memoryPercent: 90,
@@ -132,7 +132,7 @@ describe("daemon", () => {
         pollingInterval: 1000,
         agentConfig: null,
         heartbeat: {
-          url: "http://unreachable:3000/api/premortem/heartbeat/test-key",
+          url: "http://unreachable:3000/heartbeat",
           interval: 60000,
           processName: "test-daemon",
         },
@@ -149,7 +149,7 @@ describe("daemon", () => {
       );
 
       const config: Config = {
-        webhookUrl: "http://localhost:3000/api/premortem/ingest/test-key",
+        webhookUrl: "http://localhost:3000/webhook",
         anthropicApiKey: "test-api-key",
         thresholds: {
           memoryPercent: 90,
@@ -177,7 +177,7 @@ describe("daemon", () => {
       vi.mocked(startHeartbeat).mockReturnValueOnce(mockCleanup);
 
       const config: Config = {
-        webhookUrl: "http://localhost:3000/api/premortem/ingest/test-key",
+        webhookUrl: "http://localhost:3000/webhook",
         anthropicApiKey: "test-api-key",
         thresholds: {
           memoryPercent: 90,
@@ -188,7 +188,7 @@ describe("daemon", () => {
         pollingInterval: 1000,
         agentConfig: null,
         heartbeat: {
-          url: "http://localhost:3000/api/premortem/heartbeat/test-key",
+          url: "http://localhost:3000/heartbeat",
           interval: 60000,
           processName: "test-daemon",
         },
