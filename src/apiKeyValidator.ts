@@ -28,6 +28,15 @@ export const validateApiKey = async (args: {
     // Consume the async generator to trigger the API call
     for await (const msg of messages) {
       if (msg.type === "result") {
+        // Check if the result indicates an error
+        if (msg.is_error) {
+          // For subtype 'success' with is_error: true, error message is in 'result' field
+          if (msg.subtype === "success") {
+            throw new Error(msg.result);
+          }
+          // For error subtypes, errors are in 'errors' array
+          throw new Error(msg.errors.join(", "));
+        }
         break;
       }
     }
