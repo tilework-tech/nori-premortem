@@ -18,8 +18,7 @@ describe("validateHeartbeatEndpoint", () => {
 
     await expect(
       validateHeartbeatEndpoint({
-        url: "https://example.com/heartbeat",
-        webhookKey: "test-key",
+        url: "https://example.com/heartbeat/test-key",
         processName: "test-daemon",
       }),
     ).resolves.toBeUndefined();
@@ -41,8 +40,7 @@ describe("validateHeartbeatEndpoint", () => {
 
     await expect(
       validateHeartbeatEndpoint({
-        url: "https://example.com/heartbeat",
-        webhookKey: "wrong-key",
+        url: "https://example.com/heartbeat/wrong-key",
         processName: "test-daemon",
       }),
     ).rejects.toThrow("401");
@@ -53,8 +51,7 @@ describe("validateHeartbeatEndpoint", () => {
 
     await expect(
       validateHeartbeatEndpoint({
-        url: "https://unreachable.example.com/heartbeat",
-        webhookKey: "test-key",
+        url: "https://unreachable.example.com/heartbeat/test-key",
         processName: "test-daemon",
       }),
     ).rejects.toThrow("Network error");
@@ -78,8 +75,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     } as any);
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
+      url: "https://example.com/heartbeat/test-key",
       processName: "my-daemon",
       interval: 60000,
     });
@@ -107,8 +103,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     } as any);
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
+      url: "https://example.com/heartbeat/test-key",
       processName: "my-daemon",
       interval: 30000,
     });
@@ -138,8 +133,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     } as any);
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
+      url: "https://example.com/heartbeat/test-key",
       processName: "my-daemon",
       interval: 60000,
     });
@@ -172,8 +166,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     } as any);
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
+      url: "https://example.com/heartbeat/test-key",
       processName: "my-daemon",
       interval: 30000,
     });
@@ -195,8 +188,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     vi.mocked(fetch).mockRejectedValue(new Error("Network error"));
 
     const cleanup = startHeartbeat({
-      url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
+      url: "https://example.com/heartbeat/test-key",
       processName: "my-daemon",
       interval: 60000,
     });

@@ -52,22 +52,18 @@ export const startDaemon = async (args: { config: Config }): Promise<void> => {
   if (config.heartbeat) {
     await validateHeartbeatEndpoint({
       url: config.heartbeat.url,
-      webhookKey: config.webhookKey || "premortem-hardcoded-key-12345",
       processName: config.heartbeat.processName,
     });
 
     heartbeatCleanup = startHeartbeat({
       url: config.heartbeat.url,
-      webhookKey: config.webhookKey || "premortem-hardcoded-key-12345",
       processName: config.heartbeat.processName,
       interval: config.heartbeat.interval || 60000,
     });
   }
 
-  // Construct webhook URL with key
-  const webhookUrl = `${config.webhookUrl}/${
-    config.webhookKey || "premortem-hardcoded-key-12345"
-  }`;
+  // Use webhook URL directly (key is embedded in URL)
+  const webhookUrl = config.webhookUrl;
 
   // Start monitoring loop
   const monitor = async () => {
