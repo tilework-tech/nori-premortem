@@ -46,6 +46,7 @@ Example configuration:
 {
   "webhookUrl": "https://your-server.com/webhook-endpoint",
   "anthropicApiKey": "sk-ant-your-api-key-here",
+  "archiveDir": "~/.premortem-logs",
   "pollingInterval": 10000,
   "thresholds": {
     "memoryPercent": 90,
@@ -73,6 +74,11 @@ Example configuration:
   - Messages are grouped by `session_id` field
   - Each message follows the format: `{type: string, session_id: string, ...other_fields}`
 - **anthropicApiKey** (required): Your Anthropic API key for Claude
+- **archiveDir** (optional, default: `~/.premortem-logs`): Directory for local session archives
+  - Directory will be automatically created if it doesn't exist
+  - Daemon will fail-fast if directory cannot be created or is not writable
+  - Each Claude agent session is saved as `agent-{sessionId}.jsonl` in this directory
+  - Archives preserve diagnostics even if webhook delivery fails
 - **pollingInterval** (optional, default: 10000): Milliseconds between system checks
 - **thresholds** (required): At least one threshold must be configured
   - **memoryPercent**: Trigger when memory usage exceeds this percentage (uses "available" memory, not "used", to avoid false alerts from Linux buffer/cache)
@@ -94,10 +100,13 @@ nori-premortem --config ./config.json
 
 The daemon will:
 
-1. Start monitoring system metrics
-2. When a threshold is breached, spawn a Claude agent with system context
-3. Stream all agent output to your webhook endpoint
-4. Reset after the agent completes, ready to trigger again
+1. Create the archive directory if it doesn't exist (default: `~/.premortem-logs`)
+2. Validate the directory is writable (fail-fast if not)
+3. Start monitoring system metrics
+4. When a threshold is breached, spawn a Claude agent with system context
+5. Stream all agent output to your webhook endpoint
+6. Save complete session transcripts to `~/.premortem-logs/agent-{sessionId}.jsonl`
+7. Reset after the agent completes, ready to trigger again
 
 Stop the daemon with `Ctrl+C`.
 
