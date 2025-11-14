@@ -38,6 +38,13 @@ vi.mock("@/heartbeat.js", () => ({
   }),
 }));
 
+vi.mock("@/apiKeyValidator.js", () => ({
+  validateApiKey: vi.fn(async () => {
+    // Mock validation - succeeds by default
+    return Promise.resolve();
+  }),
+}));
+
 describe("daemon", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -199,6 +206,60 @@ describe("daemon", () => {
 
       // Cleanup should have been called
       expect(mockCleanup).toHaveBeenCalled();
+    });
+  });
+
+  describe("API key validation", () => {
+    it("should validate API key on startup", async () => {
+      const { validateApiKey } = await import("@/apiKeyValidator.js");
+
+      const config: Config = {
+        webhookUrl: "http://localhost:3000/webhook",
+        anthropicApiKey: "test-api-key",
+        thresholds: {
+          memoryPercent: 90,
+          diskPercent: null,
+          cpuPercent: null,
+          processName: null,
+        },
+        pollingInterval: 1000,
+        agentConfig: null,
+        heartbeat: null,
+      };
+
+      await startDaemon({ config });
+
+      // Should validate the API key
+      expect(validateApiKey).toHaveBeenCalledWith({
+        apiKey: "test-api-key",
+      });
+
+      await stopDaemon();
+    });
+
+    it("should fail startup if API key validation fails", async () => {
+      const { validateApiKey } = await import("@/apiKeyValidator.js");
+      vi.mocked(validateApiKey).mockRejectedValueOnce(
+        new Error("Invalid Anthropic API key"),
+      );
+
+      const config: Config = {
+        webhookUrl: "http://localhost:3000/webhook",
+        anthropicApiKey: "invalid-key",
+        thresholds: {
+          memoryPercent: 90,
+          diskPercent: null,
+          cpuPercent: null,
+          processName: null,
+        },
+        pollingInterval: 1000,
+        agentConfig: null,
+        heartbeat: null,
+      };
+
+      await expect(startDaemon({ config })).rejects.toThrow(
+        "Invalid Anthropic API key",
+      );
     });
   });
 });
