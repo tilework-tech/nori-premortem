@@ -1,0 +1,22 @@
+{
+  "webhookUrl": "https://your-server.com/webhook-endpoint",
+  "anthropicApiKey": "sk-ant-your-api-key-here",
+  "archiveDir": "~/.premortem-logs",
+  "pollingInterval": 10000,
+  "thresholds": {
+    "memoryPercent": 90,
+    "diskPercent": 85,
+    "cpuPercent": 80
+  },
+  "agentConfig": {
+    "model": "claude-sonnet-4",
+    "allowedTools": ["Read", "Bash", "Grep", "Glob"],
+    "maxTurns": 20,
+    "customPrompt": ""
+  },
+  "heartbeat": {
+    "url": "https://your-server.com/heartbeat-endpoint",
+    "interval": 60000,
+    "processName": "my-process"
+  }
+}

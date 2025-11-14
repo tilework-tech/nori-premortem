@@ -33,12 +33,14 @@ npm install -g .
 
 ## Configuration
 
-A `defaultConfig.json` file is provided with reasonable defaults. Copy and customize it:
+Create your configuration file from the example template:
 
 ```bash
-cp defaultConfig.json config.json
-# Edit config.json with your webhookUrl, anthropicApiKey, and desired thresholds
+cp defaultConfig.example.json defaultConfig.json
+# Edit defaultConfig.json with your webhookUrl, anthropicApiKey, and desired thresholds
 ```
+
+**Note**: `defaultConfig.json` is gitignored to prevent accidentally committing sensitive credentials.
 
 Example configuration:
 

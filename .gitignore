@@ -2,6 +2,7 @@ node_modules/
 build/
 creds.json
 test-config.json
+defaultConfig.json
 *.log
 .DS_Store
 .worktrees/
