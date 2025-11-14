@@ -76,11 +76,8 @@ const validateArchiveDir = (args: { archiveDir: string }): void => {
   }
 };
 
-export const loadConfig = (args: {
-  path: string;
-  defaultArchiveDir?: string | null;
-}): Config => {
-  const { path, defaultArchiveDir } = args;
+export const loadConfig = (args: { path: string }): Config => {
+  const { path } = args;
 
   let rawConfig: unknown;
   try {
@@ -161,12 +158,10 @@ export const loadConfig = (args: {
   }
 
   // Handle archive directory
-  let archiveDirRaw: string;
-  if (typeof config.archiveDir === "string") {
-    archiveDirRaw = config.archiveDir;
-  } else {
-    archiveDirRaw = defaultArchiveDir || DEFAULT_ARCHIVE_DIR;
-  }
+  const archiveDirRaw =
+    typeof config.archiveDir === "string"
+      ? config.archiveDir
+      : DEFAULT_ARCHIVE_DIR;
 
   const archiveDir = expandPath({ path: archiveDirRaw });
   validateArchiveDir({ archiveDir });
