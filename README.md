@@ -37,15 +37,14 @@ A `defaultConfig.json` file is provided with reasonable defaults. Copy and custo
 
 ```bash
 cp defaultConfig.json config.json
-# Edit config.json with your webhookUrl, anthropicApiKey, and desired thresholds
+# Edit config.json with your webhookUrl (including key), anthropicApiKey, and desired thresholds
 ```
 
 Example configuration:
 
 ```json
 {
-  "webhookUrl": "https://your-observability-server.com/api/premortem/ingest",
-  "webhookKey": "premortem-hardcoded-key-12345",
+  "webhookUrl": "https://your-observability-server.com/api/premortem/ingest/your-webhook-key-here",
   "anthropicApiKey": "sk-ant-your-api-key-here",
   "pollingInterval": 10000,
   "thresholds": {
@@ -64,13 +63,10 @@ Example configuration:
 
 ### Configuration Options
 
-- **webhookUrl** (required): HTTP endpoint to receive diagnostic output
+- **webhookUrl** (required): HTTP endpoint to receive diagnostic output, including the webhook key
   - Should point to your observability server's premortem ingest endpoint
-  - Format: `https://your-server.com/api/premortem/ingest`
-  - Do NOT include the webhook key in the URL - it will be appended automatically
-- **webhookKey** (optional, default: "premortem-hardcoded-key-12345"): Authentication key for webhook endpoint
-  - Current: Hardcoded temporary value
-  - Future: Will be generated per-webhook in observability UI
+  - Format: `https://your-server.com/api/premortem/ingest/your-webhook-key-here`
+  - The webhook key should be embedded in the URL path
 - **anthropicApiKey** (required): Your Anthropic API key for Claude
 - **pollingInterval** (optional, default: 10000): Milliseconds between system checks
 - **thresholds** (required): At least one threshold must be configured
