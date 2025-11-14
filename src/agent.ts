@@ -66,10 +66,11 @@ export const runAgent = async (args: {
   prompt: string;
   apiKey: string;
   config: AgentConfig;
+  archiveDir: string;
   onMessage: (msg: AgentMessage) => void;
   onComplete: () => void;
 }): Promise<void> => {
-  const { prompt, apiKey, config, onMessage, onComplete } = args;
+  const { prompt, apiKey, config, archiveDir, onMessage, onComplete } = args;
 
   // Set API key in environment
   process.env.ANTHROPIC_API_KEY = apiKey;
@@ -83,6 +84,7 @@ export const runAgent = async (args: {
         model: config.model || "claude-sonnet-4",
         maxTurns: config.maxTurns || undefined,
         allowedTools: config.allowedTools || undefined,
+        cwd: archiveDir,
         hooks: {
           PostToolUse: [
             {

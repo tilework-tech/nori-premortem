@@ -1,4 +1,14 @@
-import { readFileSync } from "node:fs";
+import {
+  readFileSync,
+  existsSync,
+  accessSync,
+  constants,
+  mkdirSync,
+  writeFileSync,
+  unlinkSync,
+} from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 export type ThresholdConfig = {
   memoryPercent?: number | null;
@@ -27,14 +37,50 @@ export type Config = {
   pollingInterval?: number | null;
   agentConfig?: AgentConfig | null;
   heartbeat?: HeartbeatConfig | null;
+  archiveDir: string;
 };
 
 const DEFAULT_POLLING_INTERVAL = 10000;
 const DEFAULT_MODEL = "claude-sonnet-4";
 const DEFAULT_HEARTBEAT_INTERVAL = 60000;
+const DEFAULT_ARCHIVE_DIR = "~/.premortem-logs";
 
-export const loadConfig = (args: { path: string }): Config => {
+const expandPath = (args: { path: string }): string => {
   const { path } = args;
+  return path.replace(/^~/, homedir());
+};
+
+const validateArchiveDir = (args: { archiveDir: string }): void => {
+  const { archiveDir } = args;
+
+  // Create directory if it doesn't exist
+  if (!existsSync(archiveDir)) {
+    try {
+      mkdirSync(archiveDir, { recursive: true });
+    } catch (error) {
+      throw new Error(
+        `Failed to create archive directory: ${archiveDir}. Error: ${error}`,
+      );
+    }
+  }
+
+  // Verify directory is writable by attempting to write a test file
+  const testFile = join(archiveDir, `.premortem-test-${Date.now()}`);
+  try {
+    writeFileSync(testFile, "test");
+    unlinkSync(testFile);
+  } catch (error) {
+    throw new Error(
+      `Archive directory is not writable: ${archiveDir}. Error: ${error}`,
+    );
+  }
+};
+
+export const loadConfig = (args: {
+  path: string;
+  defaultArchiveDir?: string | null;
+}): Config => {
+  const { path, defaultArchiveDir } = args;
 
   let rawConfig: unknown;
   try {
@@ -114,6 +160,17 @@ export const loadConfig = (args: { path: string }): Config => {
     }
   }
 
+  // Handle archive directory
+  let archiveDirRaw: string;
+  if (typeof config.archiveDir === "string") {
+    archiveDirRaw = config.archiveDir;
+  } else {
+    archiveDirRaw = defaultArchiveDir || DEFAULT_ARCHIVE_DIR;
+  }
+
+  const archiveDir = expandPath({ path: archiveDirRaw });
+  validateArchiveDir({ archiveDir });
+
   return {
     webhookUrl: config.webhookUrl,
     anthropicApiKey: config.anthropicApiKey,
@@ -121,5 +178,6 @@ export const loadConfig = (args: { path: string }): Config => {
     pollingInterval,
     agentConfig,
     heartbeat,
+    archiveDir,
   };
 };

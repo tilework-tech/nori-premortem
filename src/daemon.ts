@@ -134,6 +134,7 @@ export const startDaemon = async (args: { config: Config }): Promise<void> => {
           prompt,
           apiKey: config.anthropicApiKey,
           config: config.agentConfig || {},
+          archiveDir: config.archiveDir,
           onMessage,
           onComplete,
         }).catch((error) => {
