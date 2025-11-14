@@ -20,7 +20,6 @@ export const validateApiKey = async (args: {
     const messages = query({
       prompt: "test",
       options: {
-        model: "claude-3-haiku-20240307",
         maxTurns: 1,
       },
     });
