@@ -19,13 +19,12 @@ describe("validateHeartbeatEndpoint", () => {
     await expect(
       validateHeartbeatEndpoint({
         url: "https://example.com/heartbeat",
-        webhookKey: "test-key",
         processName: "test-daemon",
       }),
     ).resolves.toBeUndefined();
 
     expect(fetch).toHaveBeenCalledWith(
-      "https://example.com/heartbeat/test-key",
+      "https://example.com/heartbeat",
       expect.objectContaining({
         method: "POST",
       }),
@@ -42,7 +41,6 @@ describe("validateHeartbeatEndpoint", () => {
     await expect(
       validateHeartbeatEndpoint({
         url: "https://example.com/heartbeat",
-        webhookKey: "wrong-key",
         processName: "test-daemon",
       }),
     ).rejects.toThrow("401");
@@ -54,7 +52,6 @@ describe("validateHeartbeatEndpoint", () => {
     await expect(
       validateHeartbeatEndpoint({
         url: "https://unreachable.example.com/heartbeat",
-        webhookKey: "test-key",
         processName: "test-daemon",
       }),
     ).rejects.toThrow("Network error");
@@ -79,7 +76,6 @@ describe("startHeartbeat and stopHeartbeat", () => {
 
     const cleanup = startHeartbeat({
       url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
       processName: "my-daemon",
       interval: 60000,
     });
@@ -90,7 +86,7 @@ describe("startHeartbeat and stopHeartbeat", () => {
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      "https://example.com/heartbeat/test-key",
+      "https://example.com/heartbeat",
       expect.objectContaining({
         method: "POST",
         body: expect.stringContaining("my-daemon"),
@@ -108,7 +104,6 @@ describe("startHeartbeat and stopHeartbeat", () => {
 
     const cleanup = startHeartbeat({
       url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
       processName: "my-daemon",
       interval: 30000,
     });
@@ -139,7 +134,6 @@ describe("startHeartbeat and stopHeartbeat", () => {
 
     const cleanup = startHeartbeat({
       url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
       processName: "my-daemon",
       interval: 60000,
     });
@@ -173,7 +167,6 @@ describe("startHeartbeat and stopHeartbeat", () => {
 
     const cleanup = startHeartbeat({
       url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
       processName: "my-daemon",
       interval: 30000,
     });
@@ -196,7 +189,6 @@ describe("startHeartbeat and stopHeartbeat", () => {
 
     const cleanup = startHeartbeat({
       url: "https://example.com/heartbeat",
-      webhookKey: "test-key",
       processName: "my-daemon",
       interval: 60000,
     });

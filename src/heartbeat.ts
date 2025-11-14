@@ -2,14 +2,11 @@ import fetch from "node-fetch";
 
 export const validateHeartbeatEndpoint = async (args: {
   url: string;
-  webhookKey: string;
   processName: string;
 }): Promise<void> => {
-  const { url, webhookKey, processName } = args;
+  const { url, processName } = args;
 
-  const fullUrl = `${url}/${webhookKey}`;
-
-  const response = await fetch(fullUrl, {
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -30,17 +27,14 @@ export const validateHeartbeatEndpoint = async (args: {
 
 export const startHeartbeat = (args: {
   url: string;
-  webhookKey: string;
   processName: string;
   interval: number;
 }): (() => void) => {
-  const { url, webhookKey, processName, interval } = args;
+  const { url, processName, interval } = args;
 
   const sendHeartbeat = async () => {
     try {
-      const fullUrl = `${url}/${webhookKey}`;
-
-      await fetch(fullUrl, {
+      await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

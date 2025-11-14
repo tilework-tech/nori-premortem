@@ -22,7 +22,6 @@ export type HeartbeatConfig = {
 
 export type Config = {
   webhookUrl: string;
-  webhookKey?: string | null;
   anthropicApiKey: string;
   thresholds: ThresholdConfig;
   pollingInterval?: number | null;
@@ -32,7 +31,6 @@ export type Config = {
 
 const DEFAULT_POLLING_INTERVAL = 10000;
 const DEFAULT_MODEL = "claude-sonnet-4";
-const DEFAULT_WEBHOOK_KEY = "premortem-hardcoded-key-12345";
 const DEFAULT_HEARTBEAT_INTERVAL = 60000;
 
 export const loadConfig = (args: { path: string }): Config => {
@@ -70,11 +68,6 @@ export const loadConfig = (args: { path: string }): Config => {
     typeof config.pollingInterval === "number"
       ? config.pollingInterval
       : DEFAULT_POLLING_INTERVAL;
-
-  const webhookKey =
-    typeof config.webhookKey === "string"
-      ? config.webhookKey
-      : DEFAULT_WEBHOOK_KEY;
 
   const agentConfig: AgentConfig = {
     model: DEFAULT_MODEL,
@@ -123,7 +116,6 @@ export const loadConfig = (args: { path: string }): Config => {
 
   return {
     webhookUrl: config.webhookUrl,
-    webhookKey,
     anthropicApiKey: config.anthropicApiKey,
     thresholds: config.thresholds as ThresholdConfig,
     pollingInterval,
