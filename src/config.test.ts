@@ -16,13 +16,10 @@ import { loadConfig } from "@/config.js";
 describe("loadConfig", () => {
   let tmpDir: string;
   let configPath: string;
-  let archiveDir: string;
 
   beforeEach(() => {
     tmpDir = mkdtempSync(join(tmpdir(), "premortem-test-"));
     configPath = join(tmpDir, "config.json");
-    archiveDir = join(tmpDir, "archive");
-    mkdirSync(archiveDir);
   });
 
   afterEach(() => {
@@ -34,9 +31,11 @@ describe("loadConfig", () => {
   });
 
   it("should load valid config from JSON file", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -44,10 +43,7 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
     expect(config.webhookUrl).toBe("https://example.com/webhook");
     expect(config.anthropicApiKey).toBe("sk-test-key-123");
@@ -55,48 +51,50 @@ describe("loadConfig", () => {
   });
 
   it("should throw error when webhookUrl is missing", () => {
+    const archiveDir = join(tmpDir, "archive");
     const invalidConfig = {
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {},
     };
 
     writeFileSync(configPath, JSON.stringify(invalidConfig));
 
-    expect(() =>
-      loadConfig({ path: configPath, defaultArchiveDir: archiveDir }),
-    ).toThrow("webhookUrl");
+    expect(() => loadConfig({ path: configPath })).toThrow("webhookUrl");
   });
 
   it("should throw error when anthropicApiKey is missing", () => {
+    const archiveDir = join(tmpDir, "archive");
     const invalidConfig = {
       webhookUrl: "https://example.com/webhook",
+      archiveDir,
       thresholds: {},
     };
 
     writeFileSync(configPath, JSON.stringify(invalidConfig));
 
-    expect(() =>
-      loadConfig({ path: configPath, defaultArchiveDir: archiveDir }),
-    ).toThrow("anthropicApiKey");
+    expect(() => loadConfig({ path: configPath })).toThrow("anthropicApiKey");
   });
 
   it("should throw error when thresholds is missing", () => {
+    const archiveDir = join(tmpDir, "archive");
     const invalidConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
     };
 
     writeFileSync(configPath, JSON.stringify(invalidConfig));
 
-    expect(() =>
-      loadConfig({ path: configPath, defaultArchiveDir: archiveDir }),
-    ).toThrow("thresholds");
+    expect(() => loadConfig({ path: configPath })).toThrow("thresholds");
   });
 
   it("should apply default pollingInterval when not provided", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -104,18 +102,17 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
     expect(config.pollingInterval).toBe(10000);
   });
 
   it("should use provided pollingInterval", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -124,18 +121,17 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
     expect(config.pollingInterval).toBe(5000);
   });
 
   it("should apply default model when not provided", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -143,10 +139,7 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
     expect(config.agentConfig?.model).toBe("claude-sonnet-4");
   });
@@ -154,15 +147,15 @@ describe("loadConfig", () => {
   it("should throw error for file that does not exist", () => {
     const nonExistentPath = join(tmpDir, "nonexistent.json");
 
-    expect(() =>
-      loadConfig({ path: nonExistentPath, defaultArchiveDir: archiveDir }),
-    ).toThrow();
+    expect(() => loadConfig({ path: nonExistentPath })).toThrow();
   });
 
   it("should load heartbeat config when provided", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -175,10 +168,7 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
     expect(config.heartbeat?.url).toBe("https://example.com/heartbeat");
     expect(config.heartbeat?.interval).toBe(30000);
@@ -186,9 +176,11 @@ describe("loadConfig", () => {
   });
 
   it("should apply default heartbeat interval when not provided", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -200,18 +192,17 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
     expect(config.heartbeat?.interval).toBe(60000);
   });
 
   it("should allow heartbeat to be omitted entirely", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -219,18 +210,17 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
     expect(config.heartbeat).toBeNull();
   });
 
   it("should load config with webhookUrl containing embedded key", () => {
+    const archiveDir = join(tmpDir, "archive");
     const validConfig = {
       webhookUrl: "https://example.com/webhook/my-secret-key-12345",
       anthropicApiKey: "sk-test-key-123",
+      archiveDir,
       thresholds: {
         memoryPercent: 90,
       },
@@ -238,10 +228,7 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
     expect(config.webhookUrl).toBe(
       "https://example.com/webhook/my-secret-key-12345",
@@ -260,12 +247,11 @@ describe("loadConfig", () => {
 
     writeFileSync(configPath, JSON.stringify(validConfig));
 
-    const config = loadConfig({
-      path: configPath,
-      defaultArchiveDir: archiveDir,
-    });
+    const config = loadConfig({ path: configPath });
 
-    expect(config.archiveDir).toBe(archiveDir);
+    // Should use DEFAULT_ARCHIVE_DIR and expand ~
+    expect(config.archiveDir).toContain(".premortem-logs");
+    expect(existsSync(config.archiveDir)).toBe(true);
   });
 
   it("should use provided archiveDir", () => {
