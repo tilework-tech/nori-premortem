@@ -45,6 +45,7 @@ export const startHeartbeat = (args: {
           uptime: process.uptime(),
         }),
       });
+      console.log("Sent heartbeat...");
     } catch (error) {
       console.warn(`Heartbeat failed: ${error}`);
     }
