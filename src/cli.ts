@@ -72,8 +72,10 @@ export const main = async (argv: Array<string>): Promise<void> => {
   }
 };
 
-// Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run if called directly (checking if this is the main module)
+// Note: We can't use import.meta.url === `file://${process.argv[1]}` because
+// it fails when run through npm's symlink. Instead, we check if we're in a test environment.
+if (process.env.NODE_ENV !== "test" && process.env.VITEST !== "true") {
   main(process.argv).catch((error) => {
     logger.error(`Fatal error: ${error}`);
     process.exit(1);

@@ -11,7 +11,8 @@ Path: @/src
 
 ### How it fits into the larger codebase
 
-- **Entry point:** `cli.ts` loads config via `config.ts` and passes it to `startDaemon`
+- **Entry point:** `cli.ts` loads config via `config.ts` and passes it to `startDaemon` - executed automatically when the module loads (except in test environments)
+- **CLI distribution:** `package.json` defines `bin.nori-premortem` pointing to `build/cli.js`, enabling global installation via `npm install -g` which creates symlink in PATH
 - **System monitoring:** `monitor.ts` provides `fetchSystemMetrics` and `checkThresholds` called periodically by daemon
 - **Agent execution:** `agent.ts` runs Claude agent via `@anthropic-ai/claude-agent-sdk` when thresholds breach
 - **External communication:** `webhook.ts` sends all agent messages to configured webhook URL immediately as they arrive
@@ -61,6 +62,10 @@ Path: @/src
 
 ### Things to Know
 
+- **CLI module execution:** The CLI uses environment variable checks (`NODE_ENV !== "test" && VITEST !== "true"`) to determine if it should execute `main()` automatically - this ensures the CLI runs when loaded via symlink (global npm installation) or direct execution, but not during test imports
+  - Previous approach (`import.meta.url === file://${process.argv[1]}`) failed for global installations because `import.meta.url` resolved to the actual file path while `process.argv[1]` contained npm's symlink path
+  - This is a CLI entry point (not a library), so auto-execution on load is appropriate behavior
+  - Tests import the module to test `main()` directly, so the environment variable check prevents double execution
 - **Fail-fast principle:** API key validation happens at startup (not when agent runs), archive directory must be writable before daemon starts - invalid configuration fails immediately with clear errors rather than discovering problems during threshold breaches
 - **API key error detection:** The Anthropic SDK returns invalid API key errors in two ways: (1) as exceptions with `status === 401`, and (2) as result messages with `type: 'result'`, `is_error: true` - the validator checks both paths to ensure all invalid key scenarios fail fast
 - **State management:** Daemon maintains single DaemonState object tracking running/agentRunning/breachDetected/sessionId; this prevents concurrent agent spawns while allowing new breaches to be detected while previous agent is running
