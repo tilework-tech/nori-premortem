@@ -1,6 +1,5 @@
 # Nori Premortem
 
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Node Version](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
 
 A system monitoring daemon that intelligently diagnoses machine issues before critical failure using Claude AI.
