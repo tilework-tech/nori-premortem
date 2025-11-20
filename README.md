@@ -162,10 +162,6 @@ Messages are sent as raw Claude SDK output, one message per POST:
 
 The `session_id` field groups messages into a single diagnostic transcript artifact on the backend.
 
-### Authentication
-
-Webhook authentication is handled by the receiving endpoint. The webhook URL in the configuration can include authentication tokens, API keys, or other credentials as needed (e.g., `https://api.example.com/webhook?token=your-secret-token`).
-
 ## Architecture
 
 ```
