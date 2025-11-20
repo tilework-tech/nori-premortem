@@ -1,7 +1,16 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  beforeAll,
+} from "vitest";
 
 import { main } from "@/cli.js";
 
@@ -79,6 +88,14 @@ describe("CLI main function", () => {
 });
 
 describe("CLI script execution", () => {
+  beforeAll(() => {
+    // Build the project if build directory doesn't exist
+    const buildPath = join(process.cwd(), "build");
+    if (!existsSync(buildPath)) {
+      execSync("npm run build", { stdio: "inherit" });
+    }
+  });
+
   it("should execute main() when built CLI is run directly with --help", () => {
     const cliPath = join(process.cwd(), "build", "cli.js");
 
