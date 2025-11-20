@@ -1,18 +1,46 @@
 # Nori Premortem
 
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![Node Version](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
+
 A system monitoring daemon that intelligently diagnoses machine issues before critical failure using Claude AI.
+
+## Why Premortem?
+
+When running multiple intensive processes in parallel, pushing machines to their limits to maximize throughput, traditional monitoring only provides alerts when thresholds breach. By then, it's often too late to capture meaningful diagnostics.
+
+**Premortem** spawns a Claude agent the moment issues arise, analyzing the system in real-time and streaming diagnostics to a safe backend - even if the machine crashes seconds later. Instead of metric graphs, engineers get AI-powered root cause analysis.
+
+Built for engineers who push their resources to the edge to get the most out of their machines.
 
 ## Overview
 
-Premortem watches your system vitals (CPU, memory, disk, processes) and spawns Claude Code instances to diagnose problems when thresholds are breached. All diagnostic output is streamed in real-time to a configured webhook endpoint - critical for capturing diagnostics before a machine dies.
+Premortem continuously watches system vitals (CPU, memory, disk, processes) and spawns Claude agents to diagnose problems when thresholds are breached. All diagnostic output is streamed in real-time to a configured webhook endpoint - critical for capturing diagnostics before a machine dies.
 
 ## Features
 
 - **Continuous Monitoring**: Polls system metrics at configurable intervals
 - **Intelligent Diagnosis**: Spawns Claude agents with full system context when thresholds breach
-- **Real-Time Streaming**: Fire-and-forget webhook delivery ensures data reaches your backend even if the machine crashes
+- **Real-Time Streaming**: Fire-and-forget webhook delivery ensures data reaches backend even if the machine crashes
 - **Reset on Completion**: Daemon resets after each agent run, allowing multiple diagnostic sessions
 - **Configurable Thresholds**: Monitor memory %, disk %, CPU %, and process counts
+
+## Quick Start
+
+```bash
+# Clone and install
+git clone git@github.com:tilework-tech/nori-premortem.git
+cd nori-premortem
+npm install
+npm run build
+
+# Configure
+cp defaultConfig.example.json defaultConfig.json
+# Edit defaultConfig.json with your webhook URL and Anthropic API key
+
+# Run
+node build/cli.js --config ./defaultConfig.json
+```
 
 ## Installation
 
@@ -108,26 +136,14 @@ Stop the daemon with `Ctrl+C`.
 
 ## Webhook Integration
 
-### API Dependency
+Premortem streams diagnostic data to any HTTP endpoint that accepts POST requests. This allows integration with existing monitoring infrastructure, logging systems, or custom backends.
 
-**IMPORTANT**: This package requires a backend API to receive diagnostic data. It is designed to work with the Nori Observability Server, but any compatible webhook endpoint will work.
+### Webhook Endpoint Requirements
 
-**Required API Endpoint**: `POST /api/premortem/ingest/:webhookKey`
-
-The endpoint must:
+The configured webhook endpoint must:
 - Accept POST requests with raw Claude SDK message payloads
-- Handle messages grouped by `session_id`
-- Be highly available (no retry logic in premortem daemon)
-
-### Observability Server Setup
-
-Diagnostic transcripts are sent to the Nori Observability Server (separate package):
-
-1. The premortem daemon streams raw Claude SDK messages to the configured webhook URL
-2. Messages are accumulated into "premortem" artifacts in the observability UI
-3. Each diagnostic session appears as a transcript artifact viewable in the UI
-
-**Observability Server Repository**: Internal (contact team for access)
+- Handle messages grouped by `session_id` field
+- Be highly available (premortem uses fire-and-forget delivery with no retry logic)
 
 ### Message Format
 
@@ -148,7 +164,7 @@ The `session_id` field groups messages into a single diagnostic transcript artif
 
 ### Authentication
 
-Currently uses a hardcoded webhook key (`premortem-hardcoded-key-12345`). In future releases, this will be user-configurable via the observability UI's webhook management interface.
+Webhook authentication is handled by the receiving endpoint. The webhook URL in the configuration can include authentication tokens, API keys, or other credentials as needed (e.g., `https://api.example.com/webhook?token=your-secret-token`).
 
 ## Architecture
 
