@@ -146,10 +146,6 @@ Messages are sent as raw Claude SDK output, one message per POST:
 
 The `session_id` field groups messages into a single diagnostic transcript artifact on the backend.
 
-### Authentication
-
-Currently uses a hardcoded webhook key (`premortem-hardcoded-key-12345`). In future releases, this will be user-configurable via the observability UI's webhook management interface.
-
 ## Architecture
 
 ```
