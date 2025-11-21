@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { realpathSync } from "fs";
+import { pathToFileURL } from "url";
+
 import minimist from "minimist";
 import winston from "winston";
 
@@ -72,8 +75,10 @@ export const main = async (argv: Array<string>): Promise<void> => {
   }
 };
 
-// Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run if called directly (handles symlinks from npm global install)
+const realPath = realpathSync(process.argv[1]);
+const realPathAsUrl = pathToFileURL(realPath).href;
+if (import.meta.url === realPathAsUrl) {
   main(process.argv).catch((error) => {
     logger.error(`Fatal error: ${error}`);
     process.exit(1);
