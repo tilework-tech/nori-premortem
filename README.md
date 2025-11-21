@@ -4,6 +4,15 @@
 
 A system monitoring daemon that intelligently diagnoses machine issues before critical failure using Claude AI.
 
+## Installation
+
+```
+npm install -g nori-premortem@latest
+// Add config to config.json
+nori-premortem --config config.json
+```
+
+
 ## Why Premortem?
 
 When a machine dies, you are often left with no real idea what happened and why, because the machine takes everything with it. Traditional monitoring rarely captures meaningful diagnostics, because it makes strong assumptions up front about possible sources of failure and is not able to dynamically adjust based on in-stream information. You can figure out that your system OOM'd, but you won't easily figure out why, or even more important, where in your code the problem came from.
@@ -21,40 +30,6 @@ Premortem continuously watches system vitals (CPU, memory, disk, processes) and 
 - **Real-Time Streaming**: Fire-and-forget webhook delivery ensures data reaches backend even if the machine crashes
 - **Reset on Completion**: Daemon resets after each agent run, allowing multiple diagnostic sessions
 - **Configurable Thresholds**: Monitor memory %, disk %, CPU %, and process counts
-
-## Quick Start
-
-```bash
-# Clone and install
-git clone git@github.com:tilework-tech/nori-premortem.git
-cd nori-premortem
-npm install
-npm run build
-
-# Configure
-cp defaultConfig.example.json defaultConfig.json
-# Edit defaultConfig.json with your webhook URL and Anthropic API key
-
-# Run
-node build/cli.js --config ./defaultConfig.json
-```
-
-## Installation
-
-Clone and install:
-
-```bash
-git clone git@github.com:tilework-tech/nori-premortem.git
-cd nori-premortem
-npm install
-npm run build
-```
-
-Or install globally:
-
-```bash
-npm install -g .
-```
 
 ## Configuration
 
