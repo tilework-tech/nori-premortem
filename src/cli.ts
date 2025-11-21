@@ -38,7 +38,7 @@ Example:
 };
 
 const showVersion = () => {
-  console.log("nori-premortem v1.0.0");
+  console.log("nori-premortem v1.0.2");
 };
 
 export const main = async (argv: Array<string>): Promise<void> => {

@@ -1,12 +1,14 @@
 {
   "name": "nori-premortem",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "bin": {
     "nori-premortem": "./build/cli.js"
   },
   "scripts": {
     "build": "./scripts/build.sh",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "dev": "tsx watch src/cli.ts",
