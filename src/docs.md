@@ -9,6 +9,7 @@ Path: @/src
 - Handles real-time system metrics polling and agent state management during threshold breach scenarios
 - Provides graceful shutdown with cleanup of long-running processes
 - CLI entry point correctly handles npm global installation pattern (symlinks in global bin directory)
+- Automated build process ensures fresh artifacts through npm lifecycle hooks
 
 ### How it fits into the larger codebase
 
@@ -73,5 +74,7 @@ Path: @/src
 - **Agent SDK defaults:** Model selection, tool availability (allowedTools), and conversation turn limits (maxTurns) are now controlled entirely by SDK defaults - users can only customize the agent prompt via `customPrompt` field
 - **CLI entry point detection:** When npm installs a package globally (`npm install -g`), it creates symlinks in the global bin directory (e.g., `/usr/local/bin/nori-premortem`) pointing to the actual CLI script. The entry point detection in `cli.ts` uses `realpathSync()` to resolve the symlink in `process.argv[1]` to the actual file path, then converts it to a `file://` URL via `pathToFileURL()` before comparing with `import.meta.url` - this ensures the CLI executes correctly when invoked through symlinks
 - **CLI integration testing:** `cli.test.ts` creates real temporary symlinks pointing to `build/cli.js` and executes the CLI through them using `execSync()`, verifying correct behavior for `--help`, `--version`, and missing `--config` scenarios - this tests the actual npm global install pattern rather than just unit testing the entry point logic
+- **NPM publishing workflow:** Package uses `prepare` and `prepublishOnly` lifecycle hooks in `package.json` to ensure build artifacts are always fresh - `prepare` runs `npm run build` automatically before publish, pack, and git installs; `prepublishOnly` runs tests before publish to prevent shipping broken code - this prevents publishing stale build artifacts and follows the same pattern as nori-plugin
+- **Version synchronization:** Package version in `package.json` must stay synchronized with the hardcoded version string in `cli.ts:showVersion()` - both currently at v1.0.2 - this ensures `--version` flag shows correct version matching published package
 
 Created and maintained by Nori.
