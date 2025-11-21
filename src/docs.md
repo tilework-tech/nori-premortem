@@ -8,6 +8,7 @@ Path: @/src
 - Manages startup validation including API key authentication, heartbeat health checks, and archive directory creation
 - Handles real-time system metrics polling and agent state management during threshold breach scenarios
 - Provides graceful shutdown with cleanup of long-running processes
+- CLI entry point correctly handles npm global installation pattern (symlinks in global bin directory)
 
 ### How it fits into the larger codebase
 
@@ -70,5 +71,7 @@ Path: @/src
 - **Heartbeat independence:** Heartbeat loop runs on separate interval and independent of threshold monitoring - heartbeat fails only prevent heartbeat messages, not daemon operation
 - **Archive directory:** Hardcoded to `~/.premortem-logs` (not user-configurable as of simplification), created during config loading (not at runtime), passed to agent via `runAgent({ archiveDir })`, agent SDK writes `agent-{sessionId}.jsonl` files for session transcript persistence
 - **Agent SDK defaults:** Model selection, tool availability (allowedTools), and conversation turn limits (maxTurns) are now controlled entirely by SDK defaults - users can only customize the agent prompt via `customPrompt` field
+- **CLI entry point detection:** When npm installs a package globally (`npm install -g`), it creates symlinks in the global bin directory (e.g., `/usr/local/bin/nori-premortem`) pointing to the actual CLI script. The entry point detection in `cli.ts` uses `realpathSync()` to resolve the symlink in `process.argv[1]` to the actual file path, then converts it to a `file://` URL via `pathToFileURL()` before comparing with `import.meta.url` - this ensures the CLI executes correctly when invoked through symlinks
+- **CLI integration testing:** `cli.test.ts` creates real temporary symlinks pointing to `build/cli.js` and executes the CLI through them using `execSync()`, verifying correct behavior for `--help`, `--version`, and missing `--config` scenarios - this tests the actual npm global install pattern rather than just unit testing the entry point logic
 
 Created and maintained by Nori.
