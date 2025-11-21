@@ -1,21 +1,18 @@
 # Nori Premortem
 
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Node Version](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
 
 A system monitoring daemon that intelligently diagnoses machine issues before critical failure using Claude AI.
 
 ## Why Premortem?
 
-When running multiple intensive processes in parallel, pushing machines to their limits to maximize throughput, traditional monitoring only provides alerts when thresholds breach. By then, it's often too late to capture meaningful diagnostics.
+When a machine dies, you are often left with no real idea what happened and why, because the machine takes everything with it. Traditional monitoring rarely captures meaningful diagnostics, because it makes strong assumptions up front about possible sources of failure and is not able to dynamically adjust based on in-stream information. You can figure out that your system OOM'd, but you won't easily figure out why, or even more important, where in your code the problem came from.
 
-**Premortem** spawns a Claude agent the moment issues arise, analyzing the system in real-time and streaming diagnostics to a safe backend - even if the machine crashes seconds later. Instead of metric graphs, engineers get AI-powered root cause analysis.
-
-Built for engineers who push their resources to the edge to get the most out of their machines.
+**Premortem** spawns a Claude agent the moment issues arise, analyzing the system in real-time and streaming diagnostics to a safe backend. Instead of metric graphs, engineers get AI-powered root cause analysis.
 
 ## Overview
 
-Premortem continuously watches system vitals (CPU, memory, disk, processes) and spawns Claude agents to diagnose problems when thresholds are breached. All diagnostic output is streamed in real-time to a configured webhook endpoint - critical for capturing diagnostics before a machine dies.
+Premortem continuously watches system vitals (CPU, memory, disk, processes) and spawns Claude agents to diagnose problems when thresholds are breached. All diagnostic output is streamed in real-time to a configured webhook endpoint. Since the analysis is done by an AI agent, it is more flexible and more able to dig into the actual cause of why things are going haywire.
 
 ## Features
 
