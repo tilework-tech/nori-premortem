@@ -19,18 +19,6 @@ When a machine dies, you are often left with no real idea what happened and why,
 
 **Premortem** spawns a Claude agent the moment issues arise, analyzing the system in real-time and streaming diagnostics to a safe backend. Instead of metric graphs, engineers get AI-powered root cause analysis.
 
-## Overview
-
-Premortem continuously watches system vitals (CPU, memory, disk, processes) and spawns Claude agents to diagnose problems when thresholds are breached. All diagnostic output is streamed in real-time to a configured webhook endpoint. Since the analysis is done by an AI agent, it is more flexible and more able to dig into the actual cause of why things are going haywire.
-
-## Features
-
-- **Continuous Monitoring**: Polls system metrics at configurable intervals
-- **Intelligent Diagnosis**: Spawns Claude agents with full system context when thresholds breach
-- **Real-Time Streaming**: Fire-and-forget webhook delivery ensures data reaches backend even if the machine crashes
-- **Reset on Completion**: Daemon resets after each agent run, allowing multiple diagnostic sessions
-- **Configurable Thresholds**: Monitor memory %, disk %, CPU %, and process counts
-
 ## Configuration
 
 Create your configuration file from the example template:
@@ -39,8 +27,6 @@ Create your configuration file from the example template:
 cp defaultConfig.example.json defaultConfig.json
 # Edit defaultConfig.json with your webhookUrl, anthropicApiKey, and desired thresholds
 ```
-
-**Note**: `defaultConfig.json` is gitignored to prevent accidentally committing sensitive credentials.
 
 Example configuration:
 
@@ -87,13 +73,7 @@ Example configuration:
 
 ## Usage
 
-Run the daemon:
-
-```bash
-nori-premortem --config ./config.json
-```
-
-The daemon will:
+Running premortem will:
 
 1. Validate the Anthropic API key with a test query (fail-fast if invalid)
 2. Create the archive directory at `~/.premortem-logs` if it doesn't exist
