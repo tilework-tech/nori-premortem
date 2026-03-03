@@ -48,15 +48,19 @@ describe("loadConfig", () => {
     expect(config.thresholds.memoryPercent).toBe(90);
   });
 
-  it("should throw error when webhookUrl is missing", () => {
-    const invalidConfig = {
+  it("should return null webhookUrl when webhookUrl is omitted", () => {
+    const configWithoutWebhook = {
       anthropicApiKey: "sk-test-key-123",
-      thresholds: {},
+      thresholds: {
+        memoryPercent: 90,
+      },
     };
 
-    writeFileSync(configPath, JSON.stringify(invalidConfig));
+    writeFileSync(configPath, JSON.stringify(configWithoutWebhook));
 
-    expect(() => loadConfig({ path: configPath })).toThrow("webhookUrl");
+    const config = loadConfig({ path: configPath });
+
+    expect(config.webhookUrl).toBeNull();
   });
 
   it("should throw error when anthropicApiKey is missing", () => {
