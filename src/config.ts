@@ -28,7 +28,7 @@ export type HeartbeatConfig = {
 };
 
 export type Config = {
-  webhookUrl: string;
+  webhookUrl?: string | null;
   anthropicApiKey: string;
   thresholds: ThresholdConfig;
   pollingInterval?: number | null;
@@ -90,10 +90,6 @@ export const loadConfig = (args: { path: string }): Config => {
   const config = rawConfig as Record<string, unknown>;
 
   // Validate required fields
-  if (typeof config.webhookUrl !== "string") {
-    throw new Error('Config must include "webhookUrl" as a string');
-  }
-
   if (typeof config.anthropicApiKey !== "string") {
     throw new Error('Config must include "anthropicApiKey" as a string');
   }
@@ -146,7 +142,10 @@ export const loadConfig = (args: { path: string }): Config => {
   validateArchiveDir({ archiveDir });
 
   return {
-    webhookUrl: config.webhookUrl,
+    webhookUrl:
+      typeof config.webhookUrl === "string" && config.webhookUrl.length > 0
+        ? config.webhookUrl
+        : null,
     anthropicApiKey: config.anthropicApiKey,
     thresholds: config.thresholds as ThresholdConfig,
     pollingInterval,

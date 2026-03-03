@@ -67,7 +67,7 @@ export const startDaemon = async (args: { config: Config }): Promise<void> => {
   }
 
   // Use webhook URL directly (key is embedded in URL)
-  const webhookUrl = config.webhookUrl;
+  const webhookUrl = config.webhookUrl ?? null;
 
   // Start monitoring loop
   const monitor = async () => {
@@ -103,7 +103,7 @@ export const startDaemon = async (args: { config: Config }): Promise<void> => {
             state.sessionId = msg.session_id;
 
             // Send system vitals as the first message when we get session_id
-            if (!vitalsMessageSent) {
+            if (!vitalsMessageSent && webhookUrl != null) {
               vitalsMessageSent = true;
               await sendWebhook({
                 url: webhookUrl,
@@ -120,10 +120,12 @@ export const startDaemon = async (args: { config: Config }): Promise<void> => {
           }
 
           // Send raw message to webhook immediately
-          await sendWebhook({
-            url: webhookUrl,
-            message: msg,
-          });
+          if (webhookUrl != null) {
+            await sendWebhook({
+              url: webhookUrl,
+              message: msg,
+            });
+          }
         };
 
         const onComplete = () => {

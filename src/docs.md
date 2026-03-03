@@ -16,7 +16,7 @@ Path: @/src
 - **Entry point:** `cli.ts` loads config via `config.ts` and passes it to `startDaemon`
 - **System monitoring:** `monitor.ts` provides `fetchSystemMetrics` and `checkThresholds` called periodically by daemon
 - **Agent execution:** `agent.ts` runs Claude agent via `@anthropic-ai/claude-agent-sdk` when thresholds breach
-- **External communication:** `webhook.ts` sends all agent messages to configured webhook URL immediately as they arrive
+- **External communication:** `webhook.ts` sends all agent messages to configured webhook URL immediately as they arrive; webhook delivery is skipped entirely when `webhookUrl` is null (local-only mode)
 - **Health heartbeat:** `heartbeat.ts` provides optional health signals to external monitoring (separate from threshold-triggered agent)
 - **Initialization pipeline:** Config is validated in `config.ts` before passing to `startDaemon` - archive dir created, API key validated at daemon startup
 - **State preservation:** Agent sessions produce `agent-{sessionId}.jsonl` files saved to `archiveDir` for transcript archival even if webhook delivery fails
@@ -32,7 +32,7 @@ Path: @/src
 6. Register SIGINT/SIGTERM handlers for graceful shutdown
 
 **Configuration Loading** (see `config.ts:loadConfig`):
-- Validates required fields: webhookUrl, anthropicApiKey, thresholds
+- Validates required fields: anthropicApiKey, thresholds; webhookUrl is optional (defaults to null when omitted)
 - Applies defaults: pollingInterval (10000ms), heartbeat interval (60000ms), customPrompt (null)
 - **Archive directory handling:** Hardcoded to `~/.premortem-logs` (not user-configurable), expands `~` to home directory, creates directory if missing, validates writeability by writing test file
 - **Agent configuration:** Only `customPrompt` is user-configurable; model, maxTurns, and allowedTools now use SDK defaults
@@ -43,7 +43,7 @@ Path: @/src
 - Checks thresholds via `monitor.ts:checkThresholds`
 - On breach detection: generates diagnostic prompt via `agent.ts:generatePrompt` (prepends customPrompt if configured), spawns agent, sets agentRunning flag
 - Agent runs non-blocking - monitoring continues while agent executes
-- Agent output (messages) streamed to webhook via `webhook.ts:sendWebhook`
+- Agent output (messages) streamed to webhook via `webhook.ts:sendWebhook` when webhookUrl is configured; skipped when null
 - On agent completion: resets state flags, awaits next breach
 
 **API Key Validation** (see `apiKeyValidator.ts:validateApiKey`):
@@ -57,9 +57,8 @@ Path: @/src
 
 **Message Routing** (see `daemon.ts:monitor > onMessage callback`):
 - First message with session_id extracted to state for tracking
-- System vitals message sent to webhook with breach context
-- All subsequent agent messages sent immediately to webhook URL as they arrive
-- Agent archiving happens via `agent.ts:runAgent` passing archiveDir to SDK's cwd option - SDK handles JSONL file writing
+- System vitals message and all subsequent agent messages sent to webhook URL as they arrive, gated on `webhookUrl != null`
+- Agent archiving happens via `agent.ts:runAgent` passing archiveDir to SDK's cwd option - SDK handles JSONL file writing regardless of webhook configuration
 
 ### Things to Know
 
@@ -68,7 +67,7 @@ Path: @/src
 - **State management:** Daemon maintains single DaemonState object tracking running/agentRunning/breachDetected/sessionId; this prevents concurrent agent spawns while allowing new breaches to be detected while previous agent is running
 - **Non-blocking agent execution:** `runAgent` is called without await, continues in background; monitoring loop never blocks on agent completion, enabling continuous threshold checking
 - **Error boundaries:** Try-catch at monitor loop level catches and logs metric fetching errors; separate try-catch in runAgent lets agent errors bubble to caller's catch handler; only system boundaries use try-catch per codebase standards
-- **Webhook delivery:** Messages sent immediately as they arrive from agent - if webhook fails or is slow, messages may be lost unless also saved by archiveDir mechanism via agent SDK; webhook URL is used directly (webhook key embedded in URL per recent design change)
+- **Webhook delivery:** Messages sent immediately as they arrive from agent - if webhook fails or is slow, messages may be lost unless also saved by archiveDir mechanism via agent SDK; webhook URL is used directly (webhook key embedded in URL per recent design change). When `webhookUrl` is null, the daemon runs in local-only mode: monitoring, agent execution, and archive-to-disk all proceed normally, but both `sendWebhook` call sites in `daemon.ts` are guarded by `webhookUrl != null` checks and skipped
 - **Heartbeat independence:** Heartbeat loop runs on separate interval and independent of threshold monitoring - heartbeat fails only prevent heartbeat messages, not daemon operation
 - **Archive directory:** Hardcoded to `~/.premortem-logs` (not user-configurable as of simplification), created during config loading (not at runtime), passed to agent via `runAgent({ archiveDir })`, agent SDK writes `agent-{sessionId}.jsonl` files for session transcript persistence
 - **Agent SDK defaults:** Model selection, tool availability (allowedTools), and conversation turn limits (maxTurns) are now controlled entirely by SDK defaults - users can only customize the agent prompt via `customPrompt` field

@@ -25,7 +25,7 @@ Create your configuration file from the example template:
 
 ```bash
 cp defaultConfig.example.json defaultConfig.json
-# Edit defaultConfig.json with your webhookUrl, anthropicApiKey, and desired thresholds
+# Edit defaultConfig.json with your anthropicApiKey, desired thresholds, and optionally a webhookUrl
 ```
 
 Example configuration:
@@ -53,7 +53,7 @@ Example configuration:
 
 ### Configuration Options
 
-- **webhookUrl** (required): HTTP endpoint to receive diagnostic output
+- **webhookUrl** (optional, default: null): HTTP endpoint to receive diagnostic output. When omitted, the daemon runs in local-only mode (monitors, detects breaches, runs agent, archives to disk) but skips webhook delivery.
   - Must accept POST requests with JSON payloads containing Claude SDK message objects
   - Messages are grouped by `session_id` field
   - Each message follows the format: `{type: string, session_id: string, ...other_fields}`
@@ -80,7 +80,7 @@ Running premortem will:
 3. Validate the archive directory is writable (fail-fast if not)
 4. Start monitoring system metrics
 5. When a threshold is breached, spawn a Claude agent with system context
-6. Stream all agent output to your webhook endpoint
+6. Stream all agent output to your webhook endpoint (if configured)
 7. Save complete session transcripts to `~/.premortem-logs/agent-{sessionId}.jsonl`
 8. Reset after the agent completes, ready to trigger again
 
@@ -120,8 +120,10 @@ The `session_id` field groups messages into a single diagnostic transcript artif
 Daemon (monitoring loop)
   ↓ (threshold breach detected)
 Agent SDK (Claude diagnostics)
-  ↓ (immediate streaming)
-Webhook Endpoint (your server)
+  ├─→ (immediate streaming, if webhookUrl configured)
+  │   Webhook Endpoint (your server)
+  └─→ (always)
+      Archive to ~/.premortem-logs
 ```
 
 **Key Design Decisions:**
@@ -156,7 +158,7 @@ npm run build
 **Daemon not starting:**
 
 - Check that `anthropicApiKey` is valid in config
-- Verify webhook URL is reachable
+- If using a webhook, verify webhook URL is reachable
 
 **No agent triggering:**
 

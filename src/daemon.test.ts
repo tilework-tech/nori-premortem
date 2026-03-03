@@ -209,6 +209,49 @@ describe("daemon", () => {
     });
   });
 
+  describe("webhook optional", () => {
+    it("should run without calling sendWebhook when webhookUrl is null", async () => {
+      const { checkThresholds } = await import("@/monitor.js");
+      const { sendWebhook } = await import("@/webhook.js");
+      const { query } = await import("@anthropic-ai/claude-agent-sdk");
+
+      vi.mocked(checkThresholds).mockReturnValueOnce({
+        type: "memory",
+        currentValue: 95,
+        thresholdValue: 90,
+        timestamp: new Date("2026-01-01T00:00:00Z"),
+      });
+
+      const config: Config = {
+        webhookUrl: null,
+        anthropicApiKey: "test-api-key",
+        thresholds: {
+          memoryPercent: 90,
+          diskPercent: null,
+          cpuPercent: null,
+          processName: null,
+        },
+        pollingInterval: 1000,
+        agentConfig: null,
+        heartbeat: null,
+        archiveDir: "/tmp/premortem-test",
+      };
+
+      await startDaemon({ config });
+
+      // Wait a tick for the async onMessage to fire
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify the agent actually ran (breach detected, agent invoked)
+      expect(query).toHaveBeenCalled();
+
+      // Despite the agent running, webhook should NOT have been called
+      expect(sendWebhook).not.toHaveBeenCalled();
+
+      await stopDaemon();
+    });
+  });
+
   describe("API key validation", () => {
     it("should validate API key on startup", async () => {
       const { validateApiKey } = await import("@/apiKeyValidator.js");
